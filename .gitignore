@@ -1,5 +1,10 @@
 # capturas de revisión y archivos de trabajo
-*.png
+# capturas de revisión (los íconos sí van)
+shot-*.png
+b-*.png
+c-*.png
+v2-*.png
+v3-*.png
 contenido.md
 kikilandia.html
 dist/
