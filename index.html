@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kikilandia</title>
+<meta name="theme-color" content="#FFFFFF">
+<meta name="description" content="Descubrí cómo amás.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Una columna, aire generoso, la hoja de papel como protagonista */
+:root{
+  --paper:#FFFFFF;
+  --sand:#F7F5F2;
+  --ink:#17161A;
+  --grey:#6E6C73;
+  --faint:#A5A2A8;
+  --line:#E7E4DF;
+  --rose:#A2455A;
+  --tint:#FBF2F3;
+  --ui:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --r:14px;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--ui);font-size:17px;line-height:1.5;
+  font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+
+.frame{
+  min-height:100%;display:none;flex-direction:column;
+  padding-block:32px 48px;
+  padding-left:max(20px,env(safe-area-inset-left,0px));
+  padding-right:max(20px,env(safe-area-inset-right,0px));
+  max-width:560px;margin:0 auto;
+}
+.frame.on{display:flex;animation:enter .34s cubic-bezier(.32,.72,0,1)}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ── tipografía ── */
+.eyebrow{font-size:13px;font-weight:500;color:var(--faint);letter-spacing:.01em}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,8.6vw,46px);line-height:1.1;letter-spacing:-.01em;text-wrap:balance}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(27px,6.8vw,33px);line-height:1.15;text-wrap:balance}
+h3{font-family:var(--ui);font-size:13px;font-weight:600;color:var(--faint);letter-spacing:.02em}
+.sub{font-size:17px;color:var(--grey);margin-top:12px;max-width:34ch}
+.q{font-family:var(--serif);font-weight:400;font-size:clamp(26px,6.6vw,32px);line-height:1.2;margin-bottom:26px;text-wrap:balance}
+
+/* ── barra superior ── */
+.top{display:flex;align-items:center;gap:14px;margin-bottom:30px;min-height:28px}
+.ico{
+  width:32px;height:32px;border-radius:50%;border:0;background:var(--sand);
+  display:grid;place-items:center;cursor:pointer;flex:0 0 auto;color:var(--ink);
+  font-size:16px;line-height:1;transition:background .18s;
+}
+.ico:hover{background:var(--line)}
+.rail{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.rail i{display:block;height:100%;background:var(--ink);border-radius:2px;width:0;transition:width .4s cubic-bezier(.32,.72,0,1)}
+.step{font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;flex:0 0 auto}
+
+/* ── opciones ── */
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  font-family:var(--ui);font-size:16px;font-weight:400;line-height:1.4;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  padding:17px 18px;text-align:left;cursor:pointer;width:100%;
+  transition:border-color .18s,background .18s,transform .12s;
+}
+.opt:hover{border-color:#D6D2CC}
+.opt:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.opt.sel{border-color:var(--rose);background:var(--tint)}
+.opt:active{transform:scale(.99)}
+
+/* ── botones ── */
+.btn{
+  font-family:var(--ui);font-size:17px;font-weight:500;letter-spacing:-.01em;
+  background:var(--ink);color:#fff;border:0;border-radius:var(--r);
+  padding:17px 24px;cursor:pointer;width:100%;
+  transition:opacity .18s,transform .12s;
+}
+.btn:hover{opacity:.88}
+.btn:active{transform:scale(.99)}
+.btn.soft{background:var(--sand);color:var(--ink)}
+.btn.rose{background:var(--rose);color:#fff}
+.btn.line{background:none;color:var(--ink);border:1px solid var(--line)}
+.btns{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+
+/* ── hoja ── */
+.sheet{
+  width:100%;max-width:268px;margin:0 auto;display:block;border-radius:10px;
+  box-shadow:0 1px 2px rgba(23,22,26,.05),0 14px 38px -10px rgba(23,22,26,.17);
+}
+.sheetwrap{margin:26px 0 20px}
+canvas.work{display:none}
+
+/* ── papeles ── */
+.papers{display:flex;gap:10px;justify-content:center;margin-top:18px}
+.paper{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--line);cursor:pointer;
+  padding:0;transition:transform .16s,box-shadow .16s;
+}
+.paper[aria-pressed=true]{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--ink);transform:scale(1.05)}
+
+/* ── lectura ── */
+.read{margin-top:36px;display:flex;flex-direction:column;gap:26px}
+.read section{display:flex;flex-direction:column;gap:7px;padding-top:24px;border-top:1px solid var(--line)}
+.read p{font-size:16.5px;color:#3C3A40;line-height:1.62}
+.read .pull{font-family:var(--serif);font-size:23px;line-height:1.35;color:var(--ink);font-style:italic}
+
+/* ── oferta ── */
+.offer{background:var(--sand);border-radius:20px;padding:28px 22px;margin-top:42px}
+.rows{display:flex;flex-direction:column;gap:2px;margin:22px 0 26px}
+.row{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .dot{width:7px;height:7px;border-radius:50%;background:var(--rose);margin-top:9px;flex:0 0 auto}
+.row b{font-family:var(--serif);font-weight:500;font-size:21px;display:block;line-height:1.25}
+.row span{font-size:15px;color:var(--grey);display:block;margin-top:2px}
+.tag{display:flex;align-items:baseline;gap:9px}
+.tag b{font-family:var(--serif);font-weight:400;font-size:42px;line-height:1}
+.tag span{font-size:14px;color:var(--grey)}
+
+/* ── listas ── */
+.list{display:flex;flex-direction:column;margin-top:30px;border-top:1px solid var(--line)}
+.list button{
+  font-family:var(--ui);font-size:17px;font-weight:400;text-align:left;color:var(--ink);
+  background:none;border:0;border-bottom:1px solid var(--line);padding:19px 2px;
+  cursor:pointer;display:flex;align-items:center;gap:12px;transition:opacity .18s;
+}
+.list button:hover{opacity:.6}
+.list button i{font-style:normal;font-size:15px;color:var(--faint);margin-left:auto}
+
+/* ── formularios ── */
+textarea,input[type=text]{
+  width:100%;background:var(--sand);border:1px solid transparent;border-radius:var(--r);
+  color:var(--ink);font-family:var(--ui);font-size:16.5px;line-height:1.55;padding:15px;
+  resize:vertical;transition:border-color .18s,background .18s;
+}
+textarea:focus,input:focus{outline:none;border-color:var(--ink);background:var(--paper)}
+textarea::placeholder,input::placeholder{color:var(--faint)}
+label{display:block;font-size:13px;font-weight:500;color:var(--faint);margin:24px 0 9px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-family:var(--ui);font-size:15px;font-weight:400;background:var(--sand);color:var(--grey);
+  border:1px solid transparent;border-radius:999px;padding:10px 16px;cursor:pointer;transition:.18s;
+}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff}
+
+/* ── medidor ── */
+.score{display:flex;align-items:baseline;gap:12px;margin:22px 0 4px}
+.score b{font-family:var(--serif);font-weight:400;font-size:52px;line-height:1;font-variant-numeric:tabular-nums}
+.score span{font-size:14px;color:var(--grey)}
+.gauge{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:12px}
+.gauge i{display:block;height:100%;background:var(--rose);border-radius:2px;transition:width .6s cubic-bezier(.32,.72,0,1)}
+
+/* ── frases ── */
+.saved{display:flex;flex-direction:column;margin-top:26px;border-top:1px solid var(--line)}
+.saved article{padding:18px 0;border-bottom:1px solid var(--line)}
+.saved p{font-family:var(--serif);font-size:21px;line-height:1.38;color:var(--ink)}
+.saved menu{display:flex;gap:16px;margin-top:10px;list-style:none}
+.saved menu button{background:none;border:0;color:var(--faint);font-family:var(--ui);font-size:13px;font-weight:500;cursor:pointer;padding:0}
+.saved menu button:hover{color:var(--rose)}
+
+.hint{font-size:13.5px;color:var(--faint);text-align:center;margin-top:12px;line-height:1.5}
+.msg{font-size:14.5px;color:var(--rose);margin-top:14px}
+.none{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--faint);margin-top:28px}
+.grow{flex:1}
+.hidden{display:none!important}
+::selection{background:var(--tint)}
+</style>
+</head>
+<body>
+
+<!-- ░ PORTADA ░ -->
+<section class="frame on" id="s-intro">
+  <div class="eyebrow">Kikilandia</div>
+  <div class="grow" style="max-height:28px"></div>
+  <h1>Hay una forma en la que amás que nunca nadie te explicó.</h1>
+  <p class="sub">Diez preguntas. Al final entendés por qué siempre terminás en el mismo lugar.</p>
+  <div class="sheetwrap"><img class="sheet" id="demo-sheet" alt="Ejemplo del resultado"></div>
+  <div class="grow"></div>
+  <div class="btns"><button class="btn" id="go">Empezar</button></div>
+  <p class="hint">Gratis · 3 minutos</p>
+</section>
+
+<!-- ░ TEST ░ -->
+<section class="frame" id="s-quiz">
+  <div class="top">
+    <button class="ico" id="qback" aria-label="Volver">←</button>
+    <div class="rail"><i id="qrail"></i></div>
+    <div class="step" id="qstep"></div>
+  </div>
+  <p class="q" id="qtext"></p>
+  <div class="opts" id="qopts"></div>
+  <div class="grow"></div>
+</section>
+
+<!-- ░ RESULTADO ░ -->
+<section class="frame" id="s-result">
+  <div class="top"><button class="ico hidden" id="rback" aria-label="Volver">←</button><div class="eyebrow">Tu forma de amar</div></div>
+  <h1 id="r-name"></h1>
+  <div class="sheetwrap"><img class="sheet" id="r-sheet" alt="Tu frase, lista para compartir"></div>
+  <div class="papers" id="r-papers"></div>
+  <div class="btns">
+    <button class="btn" id="save">Guardar la hoja</button>
+  </div>
+  <p class="hint">Si no se descarga sola, mantené apretada la hoja para guardarla.</p>
+
+  <div class="read">
+    <section><h3>Cómo amás</h3><p id="r-como"></p></section>
+    <section><h3>Tu patrón</h3><p id="r-patron"></p></section>
+    <section><h3>Lo que buscás sin saberlo</h3><p id="r-busca"></p></section>
+    <section><h3>Lo que te hace daño</h3><p class="pull" id="r-dano"></p></section>
+  </div>
+
+  <div class="offer" id="offer">
+    <h2>Esto es lo que falta</h2>
+    <div class="rows">
+      <div class="row"><div class="dot"></div><div><b>Ustedes dos</b><span>Cómo ama él, y qué pasa cuando su forma se cruza con la tuya.</span></div></div>
+      <div class="row"><div class="dot"></div><div><b>La carta</b><span>Lo que nunca le dijiste, sobre una hoja que podés compartir.</span></div></div>
+      <div class="row"><div class="dot"></div><div><b>Tus frases</b><span>Lo que vas escribiendo, cada una con su propia hoja.</span></div></div>
+    </div>
+    <div class="tag"><b>USD 15</b><span>un pago, para siempre</span></div>
+    <div class="btns">
+      <button class="btn rose" id="buy">Desbloquear todo</button>
+      <button class="btn line" id="hascode">Ya lo compré</button>
+    </div>
+  </div>
+</section>
+
+<!-- ░ CÓDIGO ░ -->
+<section class="frame" id="s-code">
+  <div class="top"><button class="ico" data-go="s-result" aria-label="Volver">←</button></div>
+  <h2>Tu código</h2>
+  <p class="sub">Te llegó por mail después de la compra.</p>
+  <label for="code">Código</label>
+  <input type="text" id="code" placeholder="KIKI-0000" autocomplete="off" spellcheck="false">
+  <div class="btns"><button class="btn" id="codego">Entrar</button></div>
+  <p class="msg" id="codemsg"></p>
+</section>
+
+<!-- ░ MENÚ ░ -->
+<section class="frame" id="s-home">
+  <div class="eyebrow">Kikilandia</div>
+  <div style="height:22px"></div>
+  <h1 id="h-name"></h1>
+  <div class="list">
+    <button data-go="s-result">Mi forma de amar <i>leer</i></button>
+    <button data-go="s-pair">Ustedes dos <i>›</i></button>
+    <button data-go="s-letter">La carta <i>›</i></button>
+    <button data-go="s-quotes">Tus frases <i id="qn">›</i></button>
+  </div>
+  <div class="grow"></div>
+</section>
+
+<!-- ░ USTEDES DOS ░ -->
+<section class="frame" id="s-pair">
+  <div class="top"><button class="ico" data-go="s-home" aria-label="Volver">←</button><div class="eyebrow">Ustedes dos</div></div>
+  <div id="pair-intro">
+    <h1>¿Y él?</h1>
+    <p class="sub">Cinco preguntas sobre él. Después te digo qué pasa entre ustedes.</p>
+    <div class="grow"></div>
+    <div class="btns"><button class="btn" id="pairgo">Empezar</button></div>
+  </div>
+  <div id="pair-quiz" class="hidden">
+    <div class="rail" style="margin-bottom:26px"><i id="prail"></i></div>
+    <p class="q" id="ptext"></p>
+    <div class="opts" id="popts"></div>
+  </div>
+  <div id="pair-res" class="hidden">
+    <h1 id="p-title"></h1>
+    <div class="score"><b id="p-score"></b><span>de 100</span></div>
+    <div class="gauge"><i id="p-fill"></i></div>
+    <div class="read">
+      <section><h3>Él ama así</h3><p id="p-him"></p></section>
+      <section><h3>Lo que pasa entre ustedes</h3><p id="p-between"></p></section>
+      <section><h3>El riesgo</h3><p class="pull" id="p-risk"></p></section>
+    </div>
+    <div class="btns"><button class="btn soft" id="pagain">Hacerlo de nuevo</button></div>
+  </div>
+</section>
+
+<!-- ░ LA CARTA ░ -->
+<section class="frame" id="s-letter">
+  <div class="top"><button class="ico" data-go="s-home" aria-label="Volver">←</button><div class="eyebrow">La carta</div></div>
+  <h1>Escribila</h1>
+  <p class="sub">Nadie la va a recibir.</p>
+  <label>Para quién</label>
+  <div class="chips" id="l-who"></div>
+  <label for="l-text">Lo que nunca dijiste</label>
+  <textarea id="l-text" rows="6" placeholder="Empezá por donde duele."></textarea>
+  <div class="btns">
+    <button class="btn" id="lmake">Pasarla a una hoja</button>
+    <button class="btn line" id="lsave">Guardar como frase</button>
+  </div>
+  <div id="l-out" class="hidden">
+    <div class="sheetwrap"><img class="sheet" id="l-sheet" alt="Tu carta"></div>
+    <div class="papers" id="l-papers"></div>
+    <div class="btns"><button class="btn" id="lshare">Guardar la hoja</button></div>
+    <p class="hint">Si no se descarga sola, mantené apretada la hoja para guardarla.</p>
+  </div>
+  <p class="msg" id="lmsg"></p>
+</section>
+
+<!-- ░ TUS FRASES ░ -->
+<section class="frame" id="s-quotes">
+  <div class="top"><button class="ico" data-go="s-home" aria-label="Volver">←</button><div class="eyebrow">Tus frases</div></div>
+  <h1>Lo que escribís</h1>
+  <label for="q-new">Escribir una</label>
+  <textarea id="q-new" rows="3" placeholder="Lo que se te acaba de ocurrir."></textarea>
+  <div class="btns"><button class="btn" id="qadd">Guardar</button></div>
+  <div class="saved" id="q-list"></div>
+  <p class="none hidden" id="q-empty">Todavía no escribiste ninguna.</p>
+  <div id="q-out" class="hidden">
+    <div class="sheetwrap"><img class="sheet" id="q-sheet" alt="Tu frase"></div>
+    <div class="btns"><button class="btn" id="qshare">Guardar la hoja</button></div>
+    <p class="hint">Si no se descarga sola, mantené apretada la hoja para guardarla.</p>
+  </div>
+</section>
+
+<canvas class="work" id="cv" width="1080" height="1920"></canvas>
+
+<script>
+/* ═══ ARQUETIPOS ═══ */
+const A={
+ entrega:{id:'entrega',nombre:'La que se entrega entera',
+  frase:'Amás como si no existiera el después.',
+  como:'Te enamorás rápido y completo. No sabés querer a medias, y cuando elegís a alguien le das acceso a todo: tus horarios, tus miedos, tu casa, tu gente. No es que no veas las señales. Es que elegís creer que el amor alcanza.',
+  patron:'Das primero y mucho, y después medís cuánto te devuelven. Cuando no vuelve nada, te quedás vacía y culpándote por haber dado tanto.',
+  busca:'Que alguien te sostenga con la misma intensidad con la que vos sostenés. No querés menos. Querés que te igualen.',
+  dano:'Confundir "me necesita" con "me ama".',
+  da:'intensidad sin reservas',pide:'que la igualen',riesgo:'vaciarse',
+  el:'Se entrega entero y rápido. Cuando quiere, quiere con todo, y no sabe guardarse nada para después.'},
+ huye:{id:'huye',nombre:'La que se va primero',
+  frase:'Te vas antes para que no te duela que se vayan.',
+  como:'Con un pie afuera. Sentís todo, pero tenés un sistema de alarma que se activa justo cuando empieza a importar. Y cuando suena, te vas, con una buena razón: siempre tenés una buena razón.',
+  patron:'Terminás historias que iban bien. Después, meses más tarde, te preguntás qué habría pasado.',
+  busca:'Alguien que no se crea el "estoy bien" y se quede igual.',
+  dano:'Llamar independencia a lo que es miedo.',
+  da:'presencia breve y real',pide:'que no la persigan pero tampoco la suelten',riesgo:'irse de algo que servía',
+  el:'Se va cuando empieza a importar. No por falta de ganas: por exceso de miedo. Y siempre tiene una razón que suena bien.'},
+ espera:{id:'espera',nombre:'La que espera',
+  frase:'Esperaste tanto que ya no sabés si lo querés o si querés que termine de llegar.',
+  como:'Con paciencia infinita y sin pedir. Te acomodás a los tiempos del otro, justificás las demoras, agradecés lo poco. No porque no merezcas más, sino porque pedir te da más miedo que esperar.',
+  patron:'Te enamorás de gente que está a mitad de camino: ocupada, confundida, a punto de estar lista. Nunca lista.',
+  busca:'Que alguien te elija sin que vos tengas que convencerlo.',
+  dano:'Leer la ausencia como misterio en vez de como respuesta.',
+  da:'paciencia y lugar',pide:'ser elegida sin pelearlo',riesgo:'esperar a alguien que no viene',
+  el:'Está siempre a mitad de camino. Disponible pero nunca del todo, cariñoso pero sin decidirse. Te hace esperar sin prometerte nada.'},
+ silencio:{id:'silencio',nombre:'La que ama en silencio',
+  frase:'Hay gente que nunca supo que fue el amor de tu vida.',
+  como:'Hacia adentro. Sabés exactamente cuándo se ríe distinto, qué canción le gusta, cómo era su cara ese día. Y nunca lo dijiste. Lo guardaste, lo escribiste, lo hiciste tuyo sin tocarlo.',
+  patron:'Convertís a la gente en historia antes de que pase algo. Es más seguro: lo que no se dice no se puede rechazar.',
+  busca:'Que alguien lo note sin que vos tengas que exponerte.',
+  dano:'Creer que decirlo lo arruinaría. A veces decirlo era lo único que faltaba.',
+  da:'una atención que nadie más tiene',pide:'ser descubierta',riesgo:'no decirlo nunca',
+  el:'Siente mucho más de lo que muestra. Lo vas a notar en lo que hace, nunca en lo que dice, y eso te va a dejar siempre con la duda.'},
+ vuelve:{id:'vuelve',nombre:'La que vuelve siempre',
+  frase:'Sabés cómo termina y volvés igual.',
+  como:'De a ciclos. Terminás, te recomponés, y cuando él aparece otra vez, y aparece, todo el trabajo se borra. No sos débil. Es que una parte tuya sigue esperando la versión de él que viste una vez.',
+  patron:'Volvés a lo conocido aunque lo conocido duela, porque lo nuevo da más miedo que lo que ya sabés sufrir.',
+  busca:'Que esta vez sea distinto. Que te demuestre que no estabas equivocada en haber creído.',
+  dano:'Confundir historia compartida con destino.',
+  da:'una lealtad que no se gana con nada',pide:'que le demuestren que valió la pena',riesgo:'repetir el mismo final',
+  el:'Vuelve. Siempre vuelve. Desaparece, reaparece, y cada regreso te convence de que esta vez es distinto.'},
+ cerrada:{id:'cerrada',nombre:'La que no deja entrar',
+  frase:'Dejás que se acerquen hasta donde no duele.',
+  como:'Con todo menos con la parte que importa. Sos cariñosa, presente, divertida, y hay una puerta que nadie cruzó nunca. Cuando alguien se acerca a esa puerta te volvés graciosa, o cortante, o te ponés a hablar de otra cosa.',
+  patron:'Elegís gente que no insiste. Y después te duele que no hayan insistido.',
+  busca:'Alguien que se quede incluso después de ver lo que escondés.',
+  dano:'Confundir no necesitar a nadie con estar bien.',
+  da:'compañía sin exigencia',pide:'que insistan sin invadir',riesgo:'que nadie llegue nunca',
+  el:'Te deja entrar hasta cierto punto y ahí se cierra. Vas a conocer todo de él menos lo único que querés saber.'}
+};
+const ORDER=['entrega','huye','espera','silencio','vuelve','cerrada'];
+
+const Q=[
+ {t:'Cuando alguien te empieza a gustar de verdad, lo primero que hacés es…',o:[
+  {x:'Contárselo a todo el mundo antes que a él',a:['entrega']},
+  {x:'Buscar motivos para que no sea tan importante',a:['cerrada']},
+  {x:'Esperar a que él dé el primer paso',a:['espera']},
+  {x:'Guardártelo',a:['silencio']}]},
+ {t:'Tarda cuatro horas en responderte. Vos…',o:[
+  {x:'Releés toda la conversación buscando qué hiciste mal',a:['espera','vuelve']},
+  {x:'Dejás de responder vos también',a:['huye']},
+  {x:'No le das importancia, pero mirás el teléfono',a:['silencio','cerrada']},
+  {x:'Le escribís otra vez',a:['entrega']}]},
+ {t:'¿Cuál de estas frases te da más miedo?',o:[
+  {x:'"Necesito tiempo"',a:['vuelve']},
+  {x:'"Te quiero"',a:['cerrada']},
+  {x:'"No sos vos, soy yo"',a:['espera']},
+  {x:'"Siempre supe que esto no iba a funcionar"',a:['huye']}]},
+ {t:'Lo que más te costó de la última vez…',o:[
+  {x:'Aceptar que de verdad había terminado',a:['vuelve']},
+  {x:'Haber dado tanto',a:['entrega']},
+  {x:'No haber dicho nunca lo que sentía',a:['silencio']},
+  {x:'Haberme ido antes de saber qué era',a:['huye']}]},
+ {t:'En una relación, lo que más necesitás es…',o:[
+  {x:'Que me elijan todos los días',a:['espera']},
+  {x:'Que no me pidan más de lo que puedo dar',a:['cerrada']},
+  {x:'Que me dejen cuidar',a:['entrega']},
+  {x:'Que entiendan sin que yo tenga que explicar',a:['silencio']}]},
+ {t:'Cuando una historia termina, vos…',o:[
+  {x:'Guardás todo por si acaso',a:['vuelve']},
+  {x:'Borrás todo el mismo día',a:['huye']},
+  {x:'Seguís mirando sus historias meses después',a:['espera','vuelve']},
+  {x:'Nunca le dijiste nada, así que no hay mucho que terminar',a:['silencio']}]},
+ {t:'Tu peor costumbre en el amor:',o:[
+  {x:'Perdonar cosas que no se perdonan',a:['vuelve']},
+  {x:'Irme cuando se pone serio',a:['huye']},
+  {x:'Hacerme chiquita para que se quede',a:['espera','entrega']},
+  {x:'Querer a alguien que no sabe que lo quiero',a:['silencio']}]},
+ {t:'Si pudieras volver atrás, cambiarías…',o:[
+  {x:'Haber esperado tanto',a:['espera']},
+  {x:'No haberme abierto nunca',a:['cerrada']},
+  {x:'Haberme ido sin explicar',a:['huye']},
+  {x:'Haber vuelto esa última vez',a:['vuelve']}]},
+ {t:'¿Qué te dicen tus amigas?',o:[
+  {x:'"Siempre te enamorás de los que no están disponibles"',a:['espera','vuelve']},
+  {x:'"Nunca sabemos nada de tu vida amorosa"',a:['silencio']},
+  {x:'"Te entregás demasiado rápido"',a:['entrega']},
+  {x:'"No dejás que nadie se te acerque"',a:['cerrada']}]},
+ {t:'Terminá la frase: en el amor, yo…',o:[
+  {x:'doy todo y después no me queda nada',a:['entrega','entrega']},
+  {x:'me voy antes de que me duela',a:['huye','huye']},
+  {x:'espero más de lo que debería',a:['espera','espera']},
+  {x:'amo sin que nadie se entere',a:['silencio','silencio']},
+  {x:'vuelvo aunque sepa cómo termina',a:['vuelve','vuelve']},
+  {x:'no dejo que me conozcan del todo',a:['cerrada','cerrada']}]}
+];
+
+const PQ=[
+ {t:'Cuando algo le importa, él…',o:[
+  {x:'Lo dice enseguida',a:['entrega']},{x:'Se aleja un poco',a:['huye']},
+  {x:'No dice nada pero se nota',a:['silencio']},{x:'Cambia de tema',a:['cerrada']}]},
+ {t:'Su forma de desaparecer:',o:[
+  {x:'No desaparece, está siempre',a:['entrega']},{x:'Se va del todo y no vuelve',a:['huye']},
+  {x:'Se va y vuelve, se va y vuelve',a:['vuelve']},{x:'Nunca estuvo del todo',a:['espera']}]},
+ {t:'Lo que más te desespera de él:',o:[
+  {x:'Que nunca sepa lo que quiere',a:['espera']},{x:'Que no me cuente nada de él',a:['cerrada']},
+  {x:'Que sienta todo y no lo diga',a:['silencio']},{x:'Que se vaya justo cuando estábamos bien',a:['huye']}]},
+ {t:'Cuando pelean, él…',o:[
+  {x:'Se abre de más y después se arrepiente',a:['entrega']},{x:'Corta la conversación',a:['huye']},
+  {x:'Se queda callado horas',a:['silencio']},{x:'Vuelve a los dos días como si nada',a:['vuelve']}]},
+ {t:'Si tuvieras que resumirlo en una frase:',o:[
+  {x:'Me quiere más de lo que puede manejar',a:['entrega','entrega']},
+  {x:'Nunca va a estar del todo',a:['espera','espera']},
+  {x:'Siente mucho y dice poco',a:['silencio','silencio']},
+  {x:'Siempre vuelve',a:['vuelve','vuelve']},
+  {x:'Hay algo que nunca me va a mostrar',a:['cerrada','cerrada']}]}
+];
+
+const M={
+ entrega:{entrega:72,huye:38,espera:74,silencio:70,vuelve:45,cerrada:65},
+ huye:{entrega:38,huye:34,espera:31,silencio:47,vuelve:39,cerrada:58},
+ espera:{entrega:74,huye:31,espera:46,silencio:55,vuelve:51,cerrada:36},
+ silencio:{entrega:70,huye:47,espera:55,silencio:41,vuelve:49,cerrada:60},
+ vuelve:{entrega:45,huye:39,espera:51,silencio:49,vuelve:36,cerrada:44},
+ cerrada:{entrega:65,huye:58,espera:36,silencio:60,vuelve:44,cerrada:52}
+};
+const pairTitle=s=>s>=70?'Se encuentran.':s>=55?'Funciona si alguien habla primero.':s>=45?'Se quieren en idiomas distintos.':s>=38?'Uno llega siempre tarde.':'Se lastiman sin querer.';
+
+/* ═══ PAPELES ═══ */
+const PAPERS={
+ marfil:{bg:'#FDFAF4',fg:'#211D18',soft:'#9C9084',rule:'#CFC4B3',grain:11,
+   glow:'rgba(255,253,248,.34)',edge:'rgba(124,98,62,.085)',swatch:'#FDFAF4'},
+ blush:{bg:'#FBF1EE',fg:'#2B1E1D',soft:'#A98D88',rule:'#DCC0BA',grain:11,
+   glow:'rgba(255,250,248,.3)',edge:'rgba(138,86,78,.095)',swatch:'#FBF1EE'},
+ lino:{bg:'#F2EDE3',fg:'#232017',soft:'#968C79',rule:'#C8BDA9',grain:15,
+   glow:'rgba(255,253,246,.26)',edge:'rgba(112,92,58,.1)',swatch:'#F2EDE3'},
+ tinta:{bg:'#1A181C',fg:'#F2EDE5',soft:'#857E76',rule:'#4C4752',grain:8,
+   glow:'rgba(255,244,228,.04)',edge:'rgba(0,0,0,.34)',swatch:'#1A181C'}
+};
+const PKEYS=Object.keys(PAPERS);
+
+/* ═══ ESTADO ═══ */
+const store={
+ get(k,d){try{const v=localStorage.getItem('kiki.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+ set(k,v){try{localStorage.setItem('kiki.'+k,JSON.stringify(v))}catch(e){}}
+};
+let S={i:0,score:{},me:null,pi:0,pscore:{},him:null,ans:[],
+       paid:store.get('paid',false),quotes:store.get('quotes',[]),
+       paper:store.get('paper','marfil'),lpaper:store.get('lpaper','marfil')};
+ORDER.forEach(k=>{S.score[k]=0;S.pscore[k]=0});
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function show(id){$$('.frame').forEach(f=>f.classList.remove('on'));$('#'+id).classList.add('on');window.scrollTo(0,0)}
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
+
+/* ═══ LA HOJA ═══ */
+function grainFill(c,W,H,alpha){
+ const t=document.createElement('canvas');t.width=t.height=128;
+ const tc=t.getContext('2d'),d=tc.createImageData(128,128);
+ for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;
+  d.data[i]=v;d.data[i+1]=v*0.985;d.data[i+2]=v*0.95;d.data[i+3]=alpha}
+ tc.putImageData(d,0,0);
+ c.fillStyle=c.createPattern(t,'repeat');c.fillRect(0,0,W,H);
+}
+function lines(c,text,max){
+ const out=[];
+ text.split('\n').forEach(para=>{
+  let line='';
+  para.split(' ').forEach(w=>{
+   const t=line?line+' '+w:w;
+   if(c.measureText(t).width>max&&line){out.push(line);line=w}else line=t;
+  });
+  out.push(line);
+ });
+ return out;
+}
+function fitFont(c,text,max,start,min,family,lh,maxLines){
+ let size=start;
+ while(size>min){
+  c.font='300 '+size+'px '+family;
+  const l=lines(c,text,max);
+  if(l.length<=maxLines) return {size,l};
+  size-=3;
+ }
+ c.font='300 '+min+'px '+family;
+ return {size:min,l:lines(c,text,max)};
+}
+function sheet(frase, caption, paperKey){
+ const P=PAPERS[paperKey]||PAPERS.marfil;
+ const cv=$('#cv'),c=cv.getContext('2d'),W=1080,H=1920;
+ const SER='"Cormorant Garamond", Georgia, serif';
+
+ c.fillStyle=P.bg;c.fillRect(0,0,W,H);
+ // luz suave de papel fotografiado: un lavado amplio, nunca una mancha
+ const g=c.createRadialGradient(W*.5,H*.44,W*.44,W*.5,H*.5,H*.92);
+ g.addColorStop(0,P.glow);
+ g.addColorStop(.55,'rgba(0,0,0,0)');
+ g.addColorStop(1,P.edge);
+ c.fillStyle=g;c.fillRect(0,0,W,H);
+ grainFill(c,W,H,P.grain);
+
+ // marco interior
+ c.strokeStyle=P.rule;c.lineWidth=1.5;
+ c.globalAlpha=.55;c.strokeRect(76,76,W-152,H-152);c.globalAlpha=1;
+
+ c.textAlign='center';
+
+ // la frase manda
+ const fit=fitFont(c,frase,812,98,52,SER,1.34,6);
+ const lh=Math.round(fit.size*1.34);
+ const capFont=36;
+ const ruleGap=64, capGap=56;
+ const blockH=fit.l.length*lh + ruleGap + capGap + capFont;
+ let y=(H-blockH)/2 + fit.size*0.34;
+
+ c.fillStyle=P.fg;
+ c.font='300 '+fit.size+'px '+SER;
+ fit.l.forEach((t,i)=>c.fillText(t,W/2,y+i*lh));
+ y+=fit.l.length*lh + ruleGap;
+
+ // filete corto
+ c.strokeStyle=P.rule;c.lineWidth=1.5;
+ c.beginPath();c.moveTo(W/2-46,y);c.lineTo(W/2+46,y);c.stroke();
+ y+=capGap;
+
+ // de quién es la frase
+ c.fillStyle=P.soft;
+ c.font='italic 300 '+capFont+'px '+SER;
+ lines(c,caption,700).forEach((t,i)=>c.fillText(t,W/2,y+i*(capFont*1.3)));
+
+ // firma
+ c.fillStyle=P.soft;c.globalAlpha=.8;
+ c.font='400 25px Inter, system-ui, sans-serif';
+ c.fillText('@nickyyy.herreraaa',W/2,H-124);
+ c.globalAlpha=1;
+
+ return cv.toDataURL('image/png');
+}
+async function keep(dataurl,name){
+ try{
+  const blob=await(await fetch(dataurl)).blob();
+  const file=new File([blob],name,{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+ }catch(e){}
+}
+function papers(box,cur,cb){
+ const el=$(box);el.innerHTML='';
+ PKEYS.forEach(k=>{
+  const b=document.createElement('button');
+  b.className='paper';b.type='button';b.style.background=PAPERS[k].swatch;
+  b.setAttribute('aria-pressed',k===cur);b.setAttribute('aria-label','Papel '+k);
+  b.addEventListener('click',()=>cb(k));
+  el.appendChild(b);
+ });
+}
+
+/* ═══ TEST ═══ */
+function paintQ(){
+ const q=Q[S.i];
+ $('#qstep').textContent=(S.i+1)+'/'+Q.length;
+ $('#qtext').textContent=q.t;
+ $('#qrail').style.width=(S.i/Q.length*100)+'%';
+ const box=$('#qopts');box.innerHTML='';
+ q.o.forEach((o,ix)=>{
+  const b=document.createElement('button');
+  b.className='opt';b.textContent=o.x;
+  b.addEventListener('click',()=>{
+   b.classList.add('sel');
+   setTimeout(()=>pick(o,ix),170);
+  });
+  box.appendChild(b);
+ });
+ $('#qback').style.visibility=S.i===0?'hidden':'visible';
+}
+function pick(o,ix){o.a.forEach(k=>S.score[k]++);S.ans.push(ix);S.i++;S.i<Q.length?paintQ():finish()}
+$('#qback').addEventListener('click',()=>{
+ if(!S.i)return;S.i--;Q[S.i].o[S.ans.pop()].a.forEach(k=>S.score[k]--);paintQ();
+});
+$('#go').addEventListener('click',()=>{show('s-quiz');paintQ()});
+
+function finish(){
+ let best=ORDER[0];ORDER.forEach(k=>{if(S.score[k]>S.score[best])best=k});
+ S.me=A[best];store.set('me',best);
+ paintResult();show('s-result');
+}
+function drawResultSheet(){
+ $('#r-sheet').src=sheet(S.me.frase,S.me.nombre,S.paper);
+}
+function paintResult(){
+ const a=S.me;
+ $('#r-name').textContent=a.nombre;
+ $('#r-como').textContent=a.como;
+ $('#r-patron').textContent=a.patron;
+ $('#r-busca').textContent=a.busca;
+ $('#r-dano').textContent=a.dano;
+ $('#h-name').textContent=a.nombre;
+ drawResultSheet();
+ bindPapers();
+ $('#offer').classList.toggle('hidden',S.paid);
+ $('#rback').classList.toggle('hidden',!S.paid);
+}
+// re-enganche simple del selector de papel
+function bindPapers(){
+ papers('#r-papers',S.paper,k=>{S.paper=k;store.set('paper',k);bindPapers();drawResultSheet()});
+}
+$('#rback').addEventListener('click',()=>show('s-home'));
+$('#save').addEventListener('click',()=>keep($('#r-sheet').src,'kikilandia.png'));
+
+/* ═══ PAGO ═══ */
+const CHECKOUT='#';
+$('#buy').addEventListener('click',()=>{
+ if(CHECKOUT==='#'){$('#codemsg').textContent='';show('s-code');return}
+ location.href=CHECKOUT;
+});
+$('#hascode').addEventListener('click',()=>{$('#codemsg').textContent='';show('s-code')});
+$('#codego').addEventListener('click',()=>{
+ if($('#code').value.trim().toUpperCase()==='KIKI-2026'){
+  S.paid=true;store.set('paid',true);
+  $('#offer').classList.add('hidden');$('#rback').classList.remove('hidden');
+  $('#h-name').textContent=S.me?S.me.nombre:'';
+  show('s-home');
+ }else $('#codemsg').textContent='Ese código no es. Fijate en el mail de la compra.';
+});
+
+/* ═══ USTEDES DOS ═══ */
+function paintPQ(){
+ const q=PQ[S.pi];
+ $('#ptext').textContent=q.t;
+ $('#prail').style.width=(S.pi/PQ.length*100)+'%';
+ const box=$('#popts');box.innerHTML='';
+ q.o.forEach(o=>{
+  const b=document.createElement('button');b.className='opt';b.textContent=o.x;
+  b.addEventListener('click',()=>{
+   b.classList.add('sel');
+   setTimeout(()=>{o.a.forEach(k=>S.pscore[k]++);S.pi++;S.pi<PQ.length?paintPQ():pairDone()},170);
+  });
+  box.appendChild(b);
+ });
+}
+$('#pairgo').addEventListener('click',()=>{
+ S.pi=0;ORDER.forEach(k=>S.pscore[k]=0);
+ $('#pair-intro').classList.add('hidden');$('#pair-res').classList.add('hidden');
+ $('#pair-quiz').classList.remove('hidden');paintPQ();
+});
+$('#pagain').addEventListener('click',()=>{$('#pair-res').classList.add('hidden');$('#pair-intro').classList.remove('hidden')});
+function pairDone(){
+ let best=ORDER[0];ORDER.forEach(k=>{if(S.pscore[k]>S.pscore[best])best=k});
+ S.him=A[best];
+ const s=M[S.me.id][best];
+ $('#p-title').textContent=pairTitle(s);
+ $('#p-score').textContent=s;
+ $('#p-him').textContent=S.him.el;
+ const igual=S.me.id===S.him.id;
+ if(igual){
+  $('#p-between').textContent='Los dos aman de la misma manera: traen '+S.me.da+' y piden '+S.me.pide+'. Se entienden sin explicarse nada, y ese es el problema: nadie en esta pareja compensa lo que al otro le falta. Cuando se equivocan, se equivocan juntos y para el mismo lado.';
+  $('#p-risk').textContent='Comparten el mismo riesgo: '+S.me.riesgo+'. Nadie va a frenar al otro.';
+ }else{
+  $('#p-between').textContent='Vos traés '+S.me.da+' y necesitás '+S.me.pide+'. Él trae '+S.him.da+' y necesita '+S.him.pide+'. '+
+   (s>=60?'Lo que cada uno da se parece bastante a lo que el otro está buscando. No es automático, pero hay de dónde agarrarse.'
+    :s>=45?'Lo que cada uno da no es exactamente lo que el otro espera, y por eso se sienten cerca y lejos al mismo tiempo.'
+    :'Lo que vos necesitás es justo lo que a él más le cuesta dar, y al revés. No es por falta de ganas: se desencuentran siempre en el mismo punto.');
+  $('#p-risk').textContent='Tu riesgo es '+S.me.riesgo+'. El de él, '+S.him.riesgo+'.';
+ }
+ $('#pair-quiz').classList.add('hidden');$('#pair-res').classList.remove('hidden');
+ requestAnimationFrame(()=>{$('#p-fill').style.width=s+'%'});
+ window.scrollTo(0,0);
+}
+
+/* ═══ LA CARTA ═══ */
+const WHO=['A quien ya no está','A quien nunca supo','A quien todavía amo','A mí misma'];
+let lWho=WHO[0];
+function drawWho(){
+ const el=$('#l-who');el.innerHTML='';
+ WHO.forEach(w=>{
+  const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=w;
+  b.setAttribute('aria-pressed',w===lWho);
+  b.addEventListener('click',()=>{lWho=w;drawWho();if(!$('#l-out').classList.contains('hidden'))makeLetter()});
+  el.appendChild(b);
+ });
+}
+drawWho();
+function bindLPapers(){
+ papers('#l-papers',S.lpaper,k=>{S.lpaper=k;store.set('lpaper',k);bindLPapers();makeLetter()});
+}
+function makeLetter(){
+ const t=$('#l-text').value.trim();
+ if(!t){$('#lmsg').textContent='Escribí algo primero.';return}
+ $('#lmsg').textContent='';
+ const short=t.length>210?t.slice(0,207).trim()+'…':t;
+ $('#l-sheet').src=sheet(short,lWho,S.lpaper);
+ $('#l-out').classList.remove('hidden');
+}
+$('#lmake').addEventListener('click',()=>{makeLetter();bindLPapers()});
+$('#lshare').addEventListener('click',()=>keep($('#l-sheet').src,'carta.png'));
+$('#lsave').addEventListener('click',()=>{
+ const t=$('#l-text').value.trim();
+ if(!t){$('#lmsg').textContent='Escribí algo primero.';return}
+ addQuote(t);$('#lmsg').textContent='Guardada en Tus frases.';
+});
+
+/* ═══ TUS FRASES ═══ */
+function addQuote(t){S.quotes.unshift({t,d:Date.now()});store.set('quotes',S.quotes);paintQuotes()}
+function paintQuotes(){
+ const box=$('#q-list');box.innerHTML='';
+ $('#q-empty').classList.toggle('hidden',S.quotes.length>0);
+ S.quotes.forEach((q,i)=>{
+  const art=document.createElement('article');
+  const p=document.createElement('p');p.textContent=q.t;
+  const m=document.createElement('menu');
+  const mk=document.createElement('button');mk.textContent='Pasar a hoja';
+  mk.addEventListener('click',()=>{
+   $('#q-sheet').src=sheet(q.t.length>210?q.t.slice(0,207).trim()+'…':q.t,'Kikilandia',S.paper);
+   $('#q-out').classList.remove('hidden');
+   $('#q-out').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+  const del=document.createElement('button');del.textContent='Borrar';
+  del.addEventListener('click',()=>{S.quotes.splice(i,1);store.set('quotes',S.quotes);paintQuotes()});
+  m.appendChild(mk);m.appendChild(del);
+  art.appendChild(p);art.appendChild(m);box.appendChild(art);
+ });
+ $('#qn').textContent=S.quotes.length?S.quotes.length:'›';
+}
+$('#qadd').addEventListener('click',()=>{
+ const t=$('#q-new').value.trim();if(!t)return;addQuote(t);$('#q-new').value='';
+});
+$('#qshare').addEventListener('click',()=>keep($('#q-sheet').src,'frase.png'));
+paintQuotes();
+
+/* ═══ ARRANQUE ═══ */
+document.fonts.ready.then(()=>{
+ $('#demo-sheet').src=sheet('Hay gente que nunca supo que fue el amor de tu vida.','La que ama en silencio','marfil');
+ const saved=store.get('me',null);
+ if(saved&&A[saved]){
+  S.me=A[saved];paintResult();bindPapers();
+  if(S.paid){$('#h-name').textContent=S.me.nombre;show('s-home')}
+ }
+});
+</script>
+</body>
+</html>
